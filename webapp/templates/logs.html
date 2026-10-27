@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}播报日志{% endblock %}
+{% block eyebrow %}BROADCAST LOGS{% endblock %}
+{% block heading %}播报日志{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-head">
+    <h2>最近 {{ logs|length }} 次运行</h2>
+    <button class="btn btn-sm" id="refreshLogs">刷新</button>
+  </div>
+  <table>
+    <thead>
+      <tr><th style="width:170px">时间</th><th>课程</th><th style="width:120px">数据源</th><th style="width:110px">引擎</th><th>建议摘要</th></tr>
+    </thead>
+    <tbody id="logBody">
+      {% for row in logs %}
+      <tr>
+        <td class="mono dim">{{ row.time }}</td>
+        <td>{{ row.course }}</td>
+        <td>{{ row.provider }}</td>
+        <td><span class="badge-soft {{ 'badge-accent' if row.engine == 'openvoice' else 'badge-warn' }}">{{ row.engine or '-' }}</span></td>
+        <td class="muted">{{ row.advice[:48] }}{% if row.advice|length > 48 %}…{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="dim">暂无记录，先在仪表盘点击「立即播报」。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="note" style="margin-top:14px">
+    日志文件：<span class="mono">data/runs.jsonl</span>，每行一条 JSON，可用 Excel / pandas 直接分析。
+  </p>
+</div>
+
+{% endblock %}

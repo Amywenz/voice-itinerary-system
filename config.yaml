@@ -1,0 +1,96 @@
+api_key: YOUR_QWEATHER_KEY
+provider: mock
+api_host: devapi.qweather.com
+default_city: dalian
+cities:
+  dalian:
+    name: 大连
+    city: '101070201'
+    location: 121.52,38.88
+  shuangliu:
+    name: 成都·双流
+    city: '101270106'
+    location: 103.92,30.57
+  beijing:
+    name: 北京
+    city: '101010100'
+    location: 116.41,39.90
+  shanghai:
+    name: 上海
+    city: '101020100'
+    location: 121.47,31.23
+  guangzhou:
+    name: 广州
+    city: '101280101'
+    location: 113.26,23.13
+  shenzhen:
+    name: 深圳
+    city: '101280601'
+    location: 114.06,22.55
+  hangzhou:
+    name: 杭州
+    city: '101210101'
+    location: 120.15,30.28
+  chengdu:
+    name: 成都
+    city: '101270101'
+    location: 104.07,30.57
+  wuhan:
+    name: 武汉
+    city: '101200101'
+    location: 114.31,30.60
+  xian:
+    name: 西安
+    city: '101110101'
+    location: 108.95,34.27
+  chongqing:
+    name: 重庆
+    city: '101040100'
+    location: 106.55,29.57
+  nanjing:
+    name: 南京
+    city: '101190101'
+    location: 118.80,32.06
+  tianjin:
+    name: 天津
+    city: '101030100'
+    location: 117.20,39.13
+  qingdao:
+    name: 青岛
+    city: '101120201'
+    location: 120.38,36.07
+  shenyang:
+    name: 沈阳
+    city: '101070101'
+    location: 123.43,41.81
+reminder_minutes: 10
+news:
+  enabled: true
+  limit: 6
+ckpt_base: checkpoints/base_speakers/ZH
+ckpt_converter: checkpoints/converter
+reference_speaker: resources/ly2.wav
+audio_dir: outputs/advice.wav
+tmp_audio: outputs/tmp.wav
+tts_engine: auto
+speaker: default
+language: Chinese
+speed: 1.0
+enable_watermark: false
+cloud_tts:
+  provider: ''
+  endpoint: tts.tencentcloudapi.com
+  region: ''
+  secret_id: YOUR_TENCENT_SECRET_ID
+  secret_key: YOUR_TENCENT_SECRET_KEY
+  sample_rate: 16000
+  api_key: YOUR_CLOUD_KEY
+  voice_map:
+    yue: ''
+paths:
+  weather_text: resources/weather.txt
+  courses: data/courses.json
+  runs: data/runs.jsonl
+server:
+  host: 127.0.0.1
+  port: 8000

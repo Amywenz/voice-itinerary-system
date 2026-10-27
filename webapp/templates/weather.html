@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}天气与建议{% endblock %}
+{% block eyebrow %}WEATHER & ADVICE{% endblock %}
+{% block heading %}天气与出行建议{% endblock %}
+{% block content %}
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-head">
+      <h2>实时天气</h2>
+      <div class="action-row">
+        <select id="citySelect" style="width:auto">
+          {% for key, value in cities.items() %}
+          <option value="{{ key }}" {{ 'selected' if key == snapshot.city_key }}>{{ value.name or key }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-sm" id="refreshWeather">刷新</button>
+      </div>
+    </div>
+
+    <div class="grid grid-3" style="margin-bottom:16px">
+      <div class="stat"><span class="label">温度</span><div class="value"><span id="wTemp">{{ snapshot.now.temp | default('--') }}</span><small>°C</small></div></div>
+      <div class="stat"><span class="label">体感</span><div class="value"><span id="wFeels">{{ snapshot.now.feelsLike | default('--') }}</span><small>°C</small></div></div>
+      <div class="stat"><span class="label">天气</span><div class="value" style="font-size:20px" id="wText">{{ snapshot.now.text | default('--') }}</div></div>
+    </div>
+    <div class="weather-tags">
+      <span class="badge-soft">湿度 <b id="wHumidity">{{ snapshot.now.humidity | default('--') }}</b>%</span>
+      <span class="badge-soft"><b id="wWind">{{ snapshot.now.windDir | default('--') }}</b> {{ snapshot.now.windScale | default('') }}级</span>
+      <span class="badge-soft {{ 'badge-warn' if snapshot.data_source == 'mock' else 'badge-accent' }}" id="wSource">
+        {{ '离线样例' if snapshot.data_source == 'mock' else ('和风天气' if snapshot.data_source == 'qweather' else '暂不可用') }}
+      </span>
+    </div>
+    <p class="note" style="margin-top:14px">
+      低于 8°C 会提醒保暖，高于 28°C 会提醒防暑；遇到雨雪天气，会优先提醒带伞。
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>生成的建议</h2>
+      <button class="btn btn-sm btn-primary" id="synthAdvice">用这段建议合成语音</button>
+    </div>
+    <p class="advice-box" id="wAdvice">{{ snapshot.advice }}</p>
+    <div class="divider" style="margin:16px 0"></div>
+    <audio class="js-audio" id="latestAudio" controls preload="none"></audio>
+    <p class="note" style="margin-top:10px">
+      建议会一起生成语音，点上方按钮就能直接听。
+    </p>
+  </div>
+</div>
+
+<div class="card outing-card">
+  <div class="card-head">
+    <h2>出门小清单</h2>
+    <span class="hint">{{ (cities.get(city_key) or {}).get('name') or city_key }} · {{ snapshot.now.text or '天气不错' }}</span>
+  </div>
+  <div class="outing-grid">
+    {% if '雨' in (snapshot.now.text or '') or '雪' in (snapshot.now.text or '') %}
+    <div class="outing-item is-on" id="outRain"><strong>带伞</strong><span>今天有雨雪，别淋湿</span></div>
+    {% else %}
+    <div class="outing-item" id="outRain"><strong>不用带伞</strong><span>今天没有雨雪</span></div>
+    {% endif %}
+    {% if ((snapshot.now.temp or 20) | int) < 8 %}
+    <div class="outing-item is-on" id="outTemp"><strong>穿厚一点</strong><span>气温偏低，注意保暖</span></div>
+    {% elif ((snapshot.now.temp or 20) | int) > 28 %}
+    <div class="outing-item is-on" id="outTemp"><strong>注意防晒</strong><span>天气偏热，多喝水</span></div>
+    {% else %}
+    <div class="outing-item" id="outTemp"><strong>穿舒适即可</strong><span>温度刚好，适合出门</span></div>
+    {% endif %}
+    <div class="outing-item"><strong><span id="outWindDir">{{ snapshot.now.windDir or '--' }}</span> <span id="outWindScale">{{ snapshot.now.windScale or '' }}</span>级</strong><span>出门前看一眼风向</span></div>
+    <div class="outing-item"><strong>湿度 <span id="outHumidity">{{ snapshot.now.humidity or '--' }}</span>%</strong><span id="outHumidityHint">{{ '有点潮，注意通风' if ((snapshot.now.humidity or 50) | int) > 70 else '体感比较舒服' }}</span></div>
+  </div>
+</div>
+
+{% endblock %}

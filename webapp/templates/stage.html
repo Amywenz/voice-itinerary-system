@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}可视化大屏{% endblock %}
+{% block styles %}<link rel="stylesheet" href="/static/stage.css?v={{ asset_version }}">{% endblock %}
+{% block eyebrow %}LIVE ITINERARY STAGE{% endblock %}
+{% block heading %}可视化大屏{% endblock %}
+{% block content %}
+
+{% set now_info = snapshot.now or {} %}
+{% set wt = now_info.text or '' %}
+{% set wx = 'rain' if '雨' in wt else ('snow' if '雪' in wt else ('sun' if '晴' in wt else 'cloud')) %}
+{% set weather_obj = snapshot.weather or {} %}
+{% set minutely = weather_obj.get('minutely') or {} %}
+{% set points = minutely.get('minutely') or [] %}
+{% set meta = status.meta or {} %}
+
+<div class="stage">
+  <div class="stage-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <section class="stage-hero">
+    <div class="stage-hero-copy">
+      <span class="stage-kicker"><i class="live-dot"></i> LIVE · 本地实时运行</span>
+      <h2 class="stage-hero-title">今天的行程<br><em>交给声音</em></h2>
+      <p class="stage-hero-sub">
+        {% if next_course %}
+        下一节 <strong>{{ next_course.course_name }}</strong>（{{ next_course.time }}）将在课前 10 分钟自动播报天气与出行建议。
+        {% else %}
+        课程表还是空的，载入示例课程后就能看到今天的完整安排。
+        {% endif %}
+      </p>
+      <div class="stage-hero-actions">
+        <button class="btn btn-primary" id="triggerBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4l14 8-14 8z"/></svg>
+          立即播报
+        </button>
+        <button class="btn" id="stageRefresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 9a8 8 0 0 0-14-3L4 8M4 15a8 8 0 0 0 14 3l2-2"/></svg>
+          刷新数据
+        </button>
+        <button class="btn" id="stageFullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          全屏
+        </button>
+      </div>
+    </div>
+
+    <div class="stage-countdown">
+      <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#2dd4bf"/>
+            <stop offset=".55" stop-color="#38bdf8"/>
+            <stop offset="1" stop-color="#a78bfa"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+        <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" stroke="url(#ringGrad)" />
+      </svg>
+      <div class="ring-center">
+        <small>距下一节课</small>
+        <strong id="stageCountdown"
+          data-target="{{ next_course.datetime if next_course else '' }}">--:--</strong>
+        <span>{{ next_course.course_name if next_course else '尚未排课' }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage-grid">
+
+    <article class="stage-card news-card span-12">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">NEWS · 本地实时资讯</span>
+          <h3>今天的城市新闻，也会一起播</h3>
+        </div>
+        <a class="stage-link" href="/news">全部资讯 →</a>
+      </header>
+      <div class="stage-news">
+        {% for row in ((snapshot.news or {}).get('items') or [])[:3] %}
+        <div class="sn-item">
+          <span class="sn-idx">{{ loop.index }}</span>
+          <span class="sn-title">{{ row.title }}</span>
+          <span class="stage-chip {{ 'chip-mint' if row.local else '' }}">{{ '本地' if row.local else '综合' }}</span>
+        </div>
+        {% else %}
+        <div class="stage-empty slim">暂时没有抓到资讯，断网时会读取本地缓存</div>
+        {% endfor %}
+      </div>
+      <p class="stage-advice">{{ (snapshot.news or {}).get('updated') and ('资讯更新于 ' ~ (snapshot.news or {}).get('updated')) }}</p>
+    </article>
+
+    <article class="stage-card weather-card span-5">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">WEATHER · 实时天气</span>
+          <h3>出门前先看一眼天空</h3>
+        </div>
+        <span class="stage-chip" id="swSource">{{ '离线样例' if snapshot.data_source == 'mock' else ('和风天气' if snapshot.data_source == 'qweather' else '暂不可用') }}</span>
+      </header>
+
+      <div class="wx-scene wx-scene--{{ wx }}" id="swScene">
+        <div class="wx-glow"></div>
+        <div class="wx-sun"></div>
+        <div class="wx-cloud c1"></div>
+        <div class="wx-cloud c2"></div>
+        <i class="wx-drop d1"></i><i class="wx-drop d2"></i><i class="wx-drop d3"></i>
+        <div class="wx-scene-label">
+          <strong id="swTemp">{{ now_info.temp | default('--') }}<small>°C</small></strong>
+          <span id="swText">{{ now_info.text | default('暂无数据') }}</span>
+        </div>
+      </div>
+
+      <div class="wx-metrics">
+        <div><span>体感</span><strong id="swFeels">{{ now_info.feelsLike | default('--') }}°C</strong></div>
+        <div><span>湿度</span><strong id="swHumidity">{{ now_info.humidity | default('--') }}%</strong></div>
+        <div><span>风向</span><strong id="swWind">{{ now_info.windDir | default('--') }} {{ now_info.windScale | default('') }}级</strong></div>
+      </div>
+
+      <p class="stage-advice" id="swAdvice">{{ snapshot.advice }}</p>
+    </article>
+
+    <article class="stage-card voice-card span-4">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">VOICE · 语音播报</span>
+          <h3>你的专属播报</h3>
+        </div>
+        <span class="stage-chip chip-mint" id="stageVoiceName">默认音色</span>
+      </header>
+
+      <div class="wave" id="waveBars" aria-hidden="true"></div>
+
+      <audio id="latestAudio" class="js-audio" controls preload="none"
+        {% if status.audio %}src="/outputs/advice.wav?v={{ now.timestamp() }}"{% endif %}></audio>
+
+      <div class="voice-meta">
+        <div><span>时长</span><strong id="statDuration">{{ status.audio.duration if status.audio else '-' }}<small>s</small></strong></div>
+        <div><span>播报课程</span><strong class="voice-meta-text" id="stageCourse">{{ next_course.course_name if next_course else '待安排' }}</strong></div>
+      </div>
+      <p class="stage-note" id="stageSpoken">
+        {% if status.audio %}点击上方播放键，听听最近一次播报。{% else %}点「立即播报」，马上听到今天的出行建议。{% endif %}
+      </p>
+      <p class="stage-note">想换声音？去<a class="stage-inline-link" href="/studio">语音工坊</a>选一个，全站都会用。</p>
+    </article>
+
+    <article class="stage-card kpi-card span-3">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">TODAY · 今日概览</span>
+          <h3>一眼看懂</h3>
+        </div>
+      </header>
+      <div class="kpi-list">
+        <div class="kpi kpi-mint">
+          <span>今日课程</span>
+          <strong>{{ courses|length }}<small> 节</small></strong>
+        </div>
+        <div class="kpi kpi-sky">
+          <span>今日播报</span>
+          <strong><b id="kpiRuns">{{ today_runs }}</b><small> 次</small></strong>
+        </div>
+        <div class="kpi kpi-violet">
+          <span>今日待办</span>
+          <strong class="kpi-text" id="kpiTodo">--</strong>
+          <em id="kpiTodoHint">还没有添加待办</em>
+        </div>
+        <div class="kpi kpi-mint">
+          <span>下一节课</span>
+          <strong class="kpi-text">{{ next_course.time if next_course else '--:--' }}</strong>
+          <em>{{ next_course.course_name if next_course else '今天没有课了' }}</em>
+        </div>
+      </div>
+    </article>
+
+    <article class="stage-card timeline-card span-8">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">TIMELINE · 今日课程</span>
+          <h3>一条时间线，串起每一节课</h3>
+        </div>
+        <a class="stage-link" href="/courses">管理课程 →</a>
+      </header>
+
+      {% if courses %}
+      <div class="stage-timeline">
+        {% for c in courses %}
+        {% set is_next = next_course and c.time == next_course.time %}
+        <div class="st-item {{ 'is-next' if is_next }} {{ 'is-past' if c.datetime < now.isoformat() and not is_next }}">
+          <div class="st-dot"></div>
+          <strong class="st-time">{{ c.time }}</strong>
+          <span class="st-name">{{ c.course_name }}</span>
+          <em class="st-tag">{{ '下一节' if is_next else ('已结束' if c.datetime < now.isoformat() else '已排入') }}</em>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="stage-empty">
+        <strong>还没有课程</strong>
+        <p>添加课程后，系统会在每节课前 10 分钟自动播报。</p>
+        <button class="btn btn-sm" id="demoBtn">载入示例课程</button>
+      </div>
+      {% endif %}
+    </article>
+
+    <article class="stage-card rain-card span-4">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">RAIN · 分钟级降水</span>
+          <h3>{{ minutely.get('summary') or '未来两小时降水' }}</h3>
+        </div>
+      </header>
+      {% if rain_expected %}
+      <div class="rain-chart">
+        {% for p in points[:12] %}
+        <div class="rain-col">
+          <i style="height: {{ 8 + (p.precip | float) * 46 }}px"></i>
+          <span>{{ p.fxTime[11:16] }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="rain-none">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M32 6c-9 10-16 17-16 26a16 16 0 0 0 32 0c0-9-7-16-16-26z" fill="rgba(56,189,248,.16)"/>
+          <path d="M8 16c6-6 14-8 24-8" opacity=".5"/>
+          <path d="M48 8c4 3 7 7 8 12" opacity=".3"/>
+        </svg>
+        <strong>未来两小时没有降水</strong>
+        <p>{{ minutely.get('summary') or '可以放心出门，不用带伞。' }}</p>
+      </div>
+      {% endif %}
+    </article>
+
+    <article class="stage-card todo-card span-7">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">TODAY · 今日待办</span>
+          <h3>今天要完成的事</h3>
+        </div>
+        <a class="stage-link" href="/todo">管理待办 →</a>
+      </header>
+      <div class="stage-todos" id="stageTodoList">
+        <div class="stage-empty slim">还没有待办，去「今日待办」添加一件吧</div>
+      </div>
+      <div class="stage-todo-foot">
+        <span id="stageTodoSummary">完成后会在这里打勾</span>
+        <a class="stage-link" href="/todo">+ 添加待办</a>
+      </div>
+    </article>
+
+    <article class="stage-card quick-card span-5">
+      <header class="stage-card-head">
+        <div>
+          <span class="stage-label">QUICK · 快速开始</span>
+          <h3>今天还可以做这些</h3>
+        </div>
+      </header>
+      <div class="stage-quick-grid">
+        <a class="stage-quick" href="/todo">
+          <strong>今日待办</strong>
+          <span>把要做的事列清楚</span>
+        </a>
+        <a class="stage-quick" href="/focus">
+          <strong>专注计时</strong>
+          <span>25 分钟专心做一件事</span>
+        </a>
+        <a class="stage-quick" href="/weather">
+          <strong>天气与建议</strong>
+          <span>出门前看看体感和降水</span>
+        </a>
+        <a class="stage-quick" href="/courses">
+          <strong>管理课程</strong>
+          <span>安排今天的上课时间</span>
+        </a>
+      </div>
+    </article>
+
+  </section>
+</div>
+
+{% endblock %}
+{% block scripts %}<script src="/static/stage.js?v={{ asset_version }}"></script>{% endblock %}

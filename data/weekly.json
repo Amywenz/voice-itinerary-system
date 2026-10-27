@@ -1,0 +1,211 @@
+[
+  {
+    "weekday": 1,
+    "period": "第1-2节",
+    "start": "08:00",
+    "end": "09:35",
+    "course_name": "人工智能基础",
+    "code": "CS3824",
+    "room": "A311",
+    "teacher": "章涵维",
+    "weeks": "1-16周 单周"
+  },
+  {
+    "weekday": 1,
+    "period": "第3-4节",
+    "start": "10:05",
+    "end": "11:40",
+    "course_name": "Web程序设计基础",
+    "code": "CS3893",
+    "room": "B201",
+    "teacher": "武成君",
+    "weeks": "2-16周 双周"
+  },
+  {
+    "weekday": 1,
+    "period": "第5-6节",
+    "start": "13:30",
+    "end": "15:05",
+    "course_name": "理工应用英语",
+    "code": "GE638",
+    "room": "C403",
+    "teacher": "林宣宁",
+    "weeks": "2-16周"
+  },
+  {
+    "weekday": 1,
+    "period": "第7-8节",
+    "start": "15:25",
+    "end": "17:00",
+    "course_name": "实验室安全教育",
+    "code": "GE293",
+    "room": "B209",
+    "teacher": "",
+    "weeks": "10周 单周"
+  },
+  {
+    "weekday": 2,
+    "period": "第3-4节",
+    "start": "10:05",
+    "end": "11:40",
+    "course_name": "软件测试",
+    "code": "CS3580",
+    "room": "A102",
+    "teacher": "张展阳",
+    "weeks": "1-15周 单周"
+  },
+  {
+    "weekday": 2,
+    "period": "第5-6节",
+    "start": "13:30",
+    "end": "15:05",
+    "course_name": "形势与政策 V",
+    "code": "GE6179",
+    "room": "B201",
+    "teacher": "关淇棋",
+    "weeks": "5-8周"
+  },
+  {
+    "weekday": 2,
+    "period": "第7-8节",
+    "start": "15:25",
+    "end": "17:00",
+    "course_name": "体育",
+    "code": "GE6501",
+    "room": "1107",
+    "teacher": "刘瑞平",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 3,
+    "period": "第1-2节",
+    "start": "08:00",
+    "end": "09:35",
+    "course_name": "数据库系统原理",
+    "code": "CS3117",
+    "room": "C309",
+    "teacher": "黄泽宇",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 3,
+    "period": "第3-4节",
+    "start": "10:05",
+    "end": "11:40",
+    "course_name": "软件工程",
+    "code": "CS3647",
+    "room": "A311",
+    "teacher": "李小峰",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 3,
+    "period": "第7-8节",
+    "start": "15:25",
+    "end": "17:00",
+    "course_name": "理工应用英语",
+    "code": "GE6438",
+    "room": "C403",
+    "teacher": "刘瑞平",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 4,
+    "period": "第1-2节",
+    "start": "08:00",
+    "end": "09:35",
+    "course_name": "人工智能基础",
+    "code": "CS3824",
+    "room": "A311",
+    "teacher": "章涵维",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 4,
+    "period": "第3-4节",
+    "start": "10:05",
+    "end": "11:40",
+    "course_name": "软件测试",
+    "code": "CS3580",
+    "room": "C402",
+    "teacher": "张展阳",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 4,
+    "period": "第5-6节",
+    "start": "13:30",
+    "end": "15:05",
+    "course_name": "面向对象程序设计",
+    "code": "CS3892",
+    "room": "C402",
+    "teacher": "吴晓然",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 4,
+    "period": "第7-8节",
+    "start": "15:25",
+    "end": "17:00",
+    "course_name": "马克思主义基本原理",
+    "code": "GE6279",
+    "room": "C303",
+    "teacher": "李依佳",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 4,
+    "period": "第9-10节",
+    "start": "18:30",
+    "end": "20:05",
+    "course_name": "Web程序设计基础",
+    "code": "CS3893",
+    "room": "B201",
+    "teacher": "武成君",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 5,
+    "period": "第1-2节",
+    "start": "08:00",
+    "end": "09:35",
+    "course_name": "理工应用英语",
+    "code": "GE6438",
+    "room": "A301",
+    "teacher": "林宣宁",
+    "weeks": "1-15周 单周"
+  },
+  {
+    "weekday": 5,
+    "period": "第3-4节",
+    "start": "10:05",
+    "end": "11:40",
+    "course_name": "软件工程",
+    "code": "CS3647",
+    "room": "A311",
+    "teacher": "李小峰",
+    "weeks": "1-16周"
+  },
+  {
+    "weekday": 5,
+    "period": "第5-8节",
+    "start": "13:30",
+    "end": "17:00",
+    "course_name": "马克思主义基本原理",
+    "code": "GE6279",
+    "room": "W113",
+    "teacher": "李依佳",
+    "weeks": "第5周、第10周"
+  },
+  {
+    "weekday": 5,
+    "period": "第7-8节",
+    "start": "15:25",
+    "end": "17:00",
+    "course_name": "专业导引与职涯规划（软件工程）",
+    "code": "CS3563",
+    "room": "B113",
+    "teacher": "马世骏",
+    "weeks": "1-8周"
+  }
+]

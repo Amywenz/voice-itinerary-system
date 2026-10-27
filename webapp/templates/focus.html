@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}专注计时{% endblock %}
+{% block eyebrow %}FOCUS TIMER{% endblock %}
+{% block heading %}专注计时{% endblock %}
+{% block content %}
+
+<div class="focus-grid" id="focusPage">
+  <section class="card focus-timer">
+    <div class="focus-modes">
+      <button class="focus-mode active" type="button" data-min="25" data-kind="focus">专注 25 分钟</button>
+      <button class="focus-mode" type="button" data-min="5" data-kind="break">短休 5 分钟</button>
+      <button class="focus-mode" type="button" data-min="15" data-kind="break">长休 15 分钟</button>
+    </div>
+
+    <div class="focus-clock-wrap">
+      <div class="focus-ring" id="focusRing" style="--p:0%">
+        <div class="focus-clock" id="focusClock">25:00</div>
+      </div>
+    </div>
+
+    <p class="focus-hint" id="focusHint">选一段时间，开始今天的专注。</p>
+
+    <div class="focus-actions">
+      <button class="btn btn-primary" type="button" id="focusStart">开始专注</button>
+      <button class="btn" type="button" id="focusReset">重新计时</button>
+    </div>
+  </section>
+
+  <aside class="card focus-side">
+    <div class="card-head"><h2>今日专注</h2><span class="hint">只记录今天</span></div>
+    <div class="focus-stats">
+      <div><strong id="focusSessions">0</strong><span>完成轮数</span></div>
+      <div><strong id="focusMinutes">0</strong><span>专注分钟</span></div>
+    </div>
+    <div class="divider" style="margin:16px 0"></div>
+    <ul class="tip-list">
+      <li><strong>先做最重要的一件</strong><span>开始前把手机放远一点，专注会更容易。</span></li>
+      <li><strong>休息也要认真</strong><span>专注结束后起身走走，喝口水再继续。</span></li>
+      <li><strong>结束会响一声</strong><span>计时归零时会用提示音提醒你。</span></li>
+    </ul>
+    <div class="todo-side-foot">
+      <a class="btn btn-sm" href="/todo">回到今日待办 →</a>
+    </div>
+  </aside>
+</div>
+
+{% endblock %}

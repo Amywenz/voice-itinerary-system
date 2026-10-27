@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}今日资讯{% endblock %}
+{% block eyebrow %}LOCAL NEWS · 每日实时{% endblock %}
+{% block heading %}今日资讯{% endblock %}
+{% block content %}
+{% set items = news.get('items') or [] %}
+{% set local_items = items | selectattr('local') | list %}
+{% set other_items = items | rejectattr('local') | list %}
+
+<section class="news-hero">
+  <div>
+    <h2>把今天的城市新闻，<span style="color:var(--accent)">播进出行建议</span></h2>
+    <p>
+      自动挑出与你所在城市相关的新闻，也会把综合资讯整理在这一页；
+      播报时只取 1~2 条，出门路上听刚刚好。
+    </p>
+    <p class="stamp" id="newsStamp">
+      更新时间：{{ news.get('updated') or '暂无' }}
+      {% if news.get('stale') %}<span class="badge-soft badge-warn">离线缓存</span>
+      {% else %}<span class="badge-soft badge-accent">在线抓取</span>{% endif %}
+      · 共 {{ items|length }} 条
+    </p>
+  </div>
+  <div class="hero-actions">
+    <select id="newsCity" style="width:auto;min-width:130px">
+      {% for key, city in cities.items() %}
+      <option value="{{ key }}" {{ 'selected' if key == city_key }}>{{ city.name or key }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" id="refreshNews">刷新资讯</button>
+  </div>
+</section>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-head">
+      <h2>本地相关 · {{ local_items|length }} 条</h2>
+      <span class="hint">与你所在城市有关</span>
+    </div>
+    <div class="news-list" id="localNews">
+      {% for row in local_items %}
+      <div class="news-item">
+        <span class="n">{{ loop.index }}</span>
+        <div>
+          <div class="title">{{ row.title }}</div>
+          <div class="sub">{{ row.source }} · {{ row.published or '时间未知' }}</div>
+        </div>
+        <div class="side">
+          <span class="badge-soft badge-accent">本地</span>
+          <button class="btn btn-sm play-news" data-text="{{ row.title }}" data-lang="zh-CN">播报</button>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty">
+        <strong>今天没有命中本地关键词的新闻</strong>
+        可以切换城市，或到「系统设置」把默认城市改成你所在的城市。
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>综合资讯 · {{ other_items|length }} 条</h2>
+      <span class="hint">更多今日新闻</span>
+    </div>
+    <div class="news-list" id="otherNews">
+      {% for row in other_items[:8] %}
+      <div class="news-item">
+        <span class="n">{{ loop.index }}</span>
+        <div>
+          <div class="title">{{ row.title }}</div>
+          <div class="sub">{{ row.source }} · {{ row.published or '时间未知' }}</div>
+        </div>
+        <div class="side">
+          <span class="badge-soft">综合</span>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty">暂无综合资讯</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>今日播报文案</h2>
+    <a class="hint" href="/stage">去大屏看效果 →</a>
+  </div>
+  <p class="advice-box">{{ snapshot.advice }}</p>
+  <p class="note" style="margin-top:10px">
+    播报只会挑 1~2 条新闻，避免内容太长；完整列表都留在这页，随时可以回看。
+  </p>
+</div>
+
+<div class="player-bar" style="margin-top:18px">
+  <span class="pv">资讯试听</span>
+  <audio id="latestAudio" controls preload="none"></audio>
+  <span class="pv" id="newsPlayState">选择一条资讯，用普通话音色播报</span>
+</div>
+
+{% endblock %}

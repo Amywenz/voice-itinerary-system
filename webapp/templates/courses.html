@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}课程表{% endblock %}
+{% block eyebrow %}COURSE SCHEDULE{% endblock %}
+{% block heading %}课程表管理{% endblock %}
+{% block content %}
+
+<div class="card">
+    <div class="card-head">
+      <h2>我的周课表</h2>
+      <div class="action-row">
+        <span class="hint">周一至周五 · 今天 {{ today_name }}</span>
+        <button class="btn btn-sm btn-primary" id="syncToday"
+                onclick="fetch('/api/weekly/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(r=>r.json()).then(d=>{toast('已载入今日课程', d.count+' 节课');setTimeout(()=>location.reload(),700)}).catch(e=>toast('载入失败', e.message, 'danger'))">
+          载入今天的课
+        </button>
+      </div>
+    </div>
+  <div class="week-grid">
+    {% for day in weekdays %}
+    <div class="week-col {{ 'is-today' if day.index == today }}">
+      <div class="week-col-head">
+        <strong>{{ day.name }}</strong>
+        <span class="week-count">{{ day.courses | length }} 门</span>
+      </div>
+      {% for c in day.courses %}
+      <div class="week-item">
+        <div class="week-item-top">
+          <span class="week-time">{{ c.start }}–{{ c.end }}</span>
+          <span class="week-period">{{ c.period }}</span>
+        </div>
+        <strong>{{ c.course_name }}</strong>
+        {% if c.room or c.teacher %}
+        <small>{{ c.room or '' }}{% if c.room and c.teacher %} · {% endif %}{{ c.teacher or '' }}</small>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="week-empty">
+        <span>没有课</span>
+        <em>好好休息</em>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>添加课程</h2>
+    <span class="hint">选好时间，课程会自动排好</span>
+  </div>
+  <form class="course-form" id="courseForm">
+    <div class="field">
+      <label for="courseTime">上课时间</label>
+      <input type="time" id="courseTime" required>
+    </div>
+    <div class="field">
+      <label for="courseName">课程名称</label>
+      <input type="text" id="courseName" placeholder="例如：高等数学" maxlength="40" required>
+    </div>
+    <button class="btn btn-primary" type="submit">添加课程</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>全部课程</h2>
+    <div class="action-row">
+      <button class="btn btn-sm" id="demoCourses" onclick="fetch('/api/courses/demo',{method:'POST'}).then(()=>location.reload())">载入示例课程</button>
+      <button class="btn btn-sm btn-primary" id="triggerNext">立即播报下一节</button>
+    </div>
+  </div>
+
+  {% if courses %}
+  <div class="course-list">
+    {% for c in courses %}
+    <div class="course-card {{ 'is-next' if next_course and c.time == next_course.time }}">
+      <div class="cc-time">
+        <strong>{{ c.time }}</strong>
+        {% if next_course and c.time == next_course.time %}
+        <span class="badge-soft badge-accent">下一节</span>
+        {% elif c.datetime < now.isoformat() %}
+        <span class="badge-soft">已过</span>
+        {% else %}
+        <span class="badge-soft">已排期</span>
+        {% endif %}
+      </div>
+      <div class="cc-main">
+        <strong>{{ c.course_name }}</strong>
+        <small>{{ '将在课前 10 分钟自动播报天气与建议' if next_course and c.time == next_course.time else '已加入今天的行程' }}</small>
+      </div>
+      <button class="btn btn-sm btn-danger del-course" data-time="{{ c.time }}">删除</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <strong>课程表为空</strong>
+    添加课程后，系统会在课前 10 分钟自动播报天气与出行建议。
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-head"><h2>最近一次播报</h2><span class="hint">点上方「立即播报下一节」试听</span></div>
+  <p class="advice-box" id="triggerResult">还没有播报，点一下试试。</p>
+  <div style="margin-top:14px"><audio class="js-audio" id="latestAudio" controls preload="none"></audio></div>
+</div>
+
+{% endblock %}

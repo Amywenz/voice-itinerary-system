@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}仪表盘{% endblock %}
+{% block heading %}仪表盘{% endblock %}
+{% block styles %}
+<style>
+  .cast-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .cast-grid .field { margin: 0; }
+  .cast-grid select { width: 100%; }
+  .cast-card .player-bar { flex-wrap: wrap; }
+  @media (max-width: 1100px) { .cast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .cast-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <div>
+    <p class="eyebrow">SPEECH ITINERARY · {{ now.strftime('%Y-%m-%d') }}</p>
+    <h2>今天的行程，<span>交给声音</span></h2>
+    <p>课程表、天气与播报连在一起：课前 10 分钟自动提醒，也可以随时点一下立即播报。</p>
+  </div>
+  <div class="hero-actions">
+    <button class="btn btn-primary" id="triggerBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4l14 8-14 8z"/></svg>
+      立即播报
+    </button>
+    <a class="btn" href="/todo">今日待办</a>
+    <a class="btn" href="/courses">管理课程</a>
+  </div>
+</section>
+
+<section class="card cast-card" id="castCard">
+  <div class="card-head">
+    <h2>播报控制台</h2>
+    <span class="hint">地区 · 语言 · 声音，选完直接出声</span>
+  </div>
+  <div class="cast-grid">
+    <div class="field">
+      <label for="castCity">地区</label>
+      <select id="castCity">
+        {% for key, item in cities.items() %}
+        <option value="{{ key }}" {{ 'selected' if key == city_key }}>{{ item.name or key }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="castLang">语言</label>
+      <select id="castLang">
+        {% for row in catalog.languages %}
+        <option value="{{ row.code }}">{{ row.flag }} {{ row.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="castStyle">说话风格</label>
+      <select id="castStyle">
+        {% for row in catalog.styles %}
+        <option value="{{ row.id }}">{{ row.name }} · {{ row.desc }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="castMode">播报方式</label>
+      <select id="castMode">
+        <option value="fast" selected>快速合成（推荐，约 4~5 秒）</option>
+        <option value="clone">更自然的声音（稍慢）</option>
+      </select>
+    </div>
+  </div>
+  <div class="player-bar" style="margin-top:16px">
+    <button class="btn btn-primary" id="castBtn" type="button">开始播报</button>
+    <span class="pv" id="castState">尚未播报</span>
+  </div>
+  <audio class="js-audio" id="castAudio" controls preload="none"></audio>
+  <p class="note" style="margin-top:10px">
+    选好地区和声音后点「开始播报」，第一次播放记得允许浏览器出声。
+    想换声音，去<a href="/studio">语音工坊</a>挑一个，全站都会用。
+  </p>
+</section>
+
+<div class="grid grid-4">
+  <div class="card stat">
+    <span class="label">今日课程</span>
+    <div class="value">{{ courses|length }}<small>节</small></div>
+    <span class="sub">按上课时间自动排序</span>
+  </div>
+  <div class="card stat accent">
+    <span class="label">下一节课</span>
+    {% if next_course %}
+    <div class="value">{{ next_course.time }}</div>
+    <span class="sub" id="countdown" data-next="{{ next_course.datetime }}" data-course="{{ next_course.course_name }}">{{ next_course.course_name }}</span>
+    {% else %}
+    <div class="value">--:--</div>
+    <span class="sub">课程表为空</span>
+    {% endif %}
+  </div>
+  <div class="card stat">
+    <span class="label">当前体感温度</span>
+    <div class="value"><span id="dashFeels">{{ snapshot.now.feelsLike | default('--') }}</span><small>°C</small></div>
+    <span class="sub"><span id="dashText">{{ snapshot.now.text | default('暂无数据') }}</span> · <span id="dashSource">{{ snapshot.data_source }}</span></span>
+  </div>
+  <div class="card stat">
+    <span class="label">全站音色</span>
+    <div class="value" style="font-size:20px" id="dashVoiceName">默认音色</div>
+    <span class="sub">在语音工坊里随时更换</span>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-head">
+      <h2>今日时间线</h2>
+      <a class="hint" href="/courses">编辑课程表 →</a>
+    </div>
+    {% if courses %}
+    <div class="timeline">
+      {% for c in courses %}
+      <div class="tl-item {{ 'next' if next_course and c.time == next_course.time }} {{ 'past' if c.datetime < now.isoformat() and not (next_course and c.time == next_course.time) }}">
+        <span class="tl-time">{{ c.time }}</span>
+        <span class="tl-rail"><i class="tl-dot"></i></span>
+        <div>
+          <div class="tl-name">{{ c.course_name }}</div>
+          <div class="tl-meta">{{ '下一节 · 将在课前 10 分钟播报' if next_course and c.time == next_course.time else '已排入课程表' }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+      <strong>还没有课程</strong>
+      添加课程后，系统会在每节课前 10 分钟自动播报天气与出行建议。
+      <div style="margin-top:14px"><button class="btn btn-sm" id="demoBtn">载入示例课程</button></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>天气与建议</h2>
+      <span class="badge-soft {{ 'badge-warn' if snapshot.data_source == 'mock' else 'badge-accent' }}" id="dashSourceBadge">
+        {{ '离线样例' if snapshot.data_source == 'mock' else ('和风天气' if snapshot.data_source == 'qweather' else '暂不可用') }}
+      </span>
+    </div>
+    <div class="weather-main">
+      <span class="temp"><span id="dashTemp">{{ snapshot.now.temp | default('--') }}</span><small>°C</small></span>
+      <span class="muted" id="dashWeatherText">{{ snapshot.now.text | default('暂无数据') }}</span>
+    </div>
+    <div class="weather-tags">
+      <span class="badge-soft">体感 <span id="dashFeelsTag">{{ snapshot.now.feelsLike | default('--') }}</span>°C</span>
+      <span class="badge-soft">湿度 <span id="dashHumidity">{{ snapshot.now.humidity | default('--') }}</span>%</span>
+      <span class="badge-soft"><span id="dashWind">{{ snapshot.now.windDir | default('--') }}</span> <span id="dashWindScale">{{ snapshot.now.windScale | default('') }}</span>级</span>
+    </div>
+    <div class="divider" style="margin:16px 0"></div>
+    <p class="advice-box" id="latestAdvice">{{ snapshot.advice }}</p>
+    <div class="divider" style="margin:16px 0"></div>
+    <audio class="js-audio" id="latestAudio" controls preload="none"
+      {% if status.audio %}src="/outputs/advice.wav?v={{ now.timestamp() }}"{% endif %}></audio>
+    <p class="note" style="margin-top:8px">
+      最新播报：<span id="latestEngine">{{ '已生成' if status.meta.engine else '尚未生成' }}</span>
+      {% if status.meta.duration %}· {{ status.meta.duration }}s{% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>本地实时资讯</h2>
+    <a class="hint" href="/news">全部资讯 →</a>
+  </div>
+  <div class="news-strip">
+    {% for row in ((snapshot.news or {}).get('items') or [])[:3] %}
+    <div class="news-line">
+      <span class="idx">{{ loop.index }}</span>
+      <span class="txt">{{ row.title }}</span>
+      <span class="tag {{ 'local' if row.local }}">{{ '本地' if row.local else '综合' }}</span>
+    </div>
+    {% else %}
+    <div class="empty">暂时没有抓到资讯，断网时会读取本地缓存</div>
+    {% endfor %}
+  </div>
+  <p class="note" style="margin-top:10px">
+    资讯来自公开新闻源 · 更新于 <span id="dashNewsUpdated">{{ (snapshot.news or {}).get('updated') or '暂无' }}</span>
+    · 播报时会自动挑 1~2 条一起说。
+  </p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+# 运行时依赖（Python 3.11 / Windows 10+）
+# 安装顺序：先装 torch CPU 版，再装本文件其余依赖
+#   pip install torch==2.1.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+numpy==1.26.4
+scipy>=1.10,<2
+requests==2.34.2
+PyYAML==6.0.3
+soundfile==0.14.0
+librosa==0.10.1
+piper-tts==1.8.0
+edge-tts==7.3.1
+torch==2.1.2
+torchaudio==2.1.2
+fastapi==0.159.1
+uvicorn[standard]==0.54.0
+jinja2==3.1.6
+python-multipart==0.0.32
+pytest==9.1.1
+python-docx==1.2.0
+matplotlib==3.11.2
+# simpleaudio 1.0.4 仅提供到 cp38 的 wheel，Python 3.11 需要本机 MSVC 编译；
+# 装不上时 play.py 会自动降级到 winsound（同为阻塞播放），不影响主流程。
+simpleaudio==1.0.4

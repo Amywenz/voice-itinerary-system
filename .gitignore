@@ -1,0 +1,23 @@
+# ---------- Python 虚拟环境：体积近 1GB，按 requirements.txt 重建 ----------
+.venv/
+venv/
+
+# ---------- 模型权重：由 scripts/download_models.py、scripts/download_voices.py 拉取 ----------
+checkpoints/
+voices/
+
+# ---------- 运行产物：每次运行重新生成 ----------
+outputs/
+
+# ---------- 本地配置：含真实 API Key / 云 TTS 密钥，绝不入库 ----------
+config.local.yaml
+
+# ---------- 缓存与 IDE 配置 ----------
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.screenshots/
+.idea/
+
+# ---------- 运行时状态 ----------
+data/news_cache.json

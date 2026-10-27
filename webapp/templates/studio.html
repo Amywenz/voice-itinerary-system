@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}语音工坊{% endblock %}
+{% block eyebrow %}VOICE STUDIO{% endblock %}
+{% block heading %}语音工坊{% endblock %}
+{% block content %}
+
+<div class="card global-voice-card">
+  <div class="card-head">
+    <h2>全站音色</h2>
+    <span class="hint">选一次，所有页面都用这个声音</span>
+  </div>
+  <div class="global-voice-row">
+    <span class="gv-orb"></span>
+    <div class="gv-copy">
+      <small>当前全站音色</small>
+      <strong id="globalVoiceState">尚未指定，使用默认音色</strong>
+    </div>
+    <a class="btn btn-sm" href="/">去播报 →</a>
+  </div>
+  <p class="note">在下方点任意音色，会立即设为全站默认音色；试听只播放示例文本，不会改变今天的播报内容。</p>
+</div>
+
+<div class="card" id="voiceLab">
+  <div class="card-head">
+    <h2>挑一个喜欢的声音</h2>
+    <span class="hint">点选即设为全站音色</span>
+  </div>
+
+  <div class="lang-tabs" id="langTabs">
+    {% for lang in catalog.languages %}
+    <button class="lang-tab {{ 'active' if loop.first }}" type="button"
+            data-lang="{{ lang.code }}" data-sample="{{ lang.sample }}">
+      <span class="flag">{{ lang.flag }}</span>
+      <span>{{ lang.name }}</span>
+      <span class="tiny" style="opacity:.6">{{ lang.native }}</span>
+    </button>
+    {% endfor %}
+  </div>
+
+  <div class="voice-grid" id="voiceGrid"></div>
+
+  <div class="voice-workbench">
+    <div class="field">
+      <label for="voiceText">试听文本</label>
+      <textarea id="voiceText" style="min-height:92px">{{ catalog.languages[0].sample }}</textarea>
+    </div>
+    <div class="field">
+      <label for="voiceStyle">说话风格</label>
+      <select id="voiceStyle">
+        {% for row in catalog.styles %}
+        <option value="{{ row.id }}">{{ row.name }} · {{ row.desc }}</option>
+        {% endfor %}
+      </select>
+      <div class="player-bar" style="margin-top:12px">
+        <audio id="voiceAudio" controls preload="none"></audio>
+        <button class="btn btn-primary" type="button" id="voicePlay">合成并试听</button>
+      </div>
+      <span class="pv" id="voiceState">还没有试听</span>
+    </div>
+  </div>
+  <p class="note">粤语优先使用真粤语音色；云端音色未配置或网络不可用时，会自动换成本地可用音色，并在结果里说明原因。</p>
+</div>
+
+<div class="studio-grid">
+  <div class="card">
+    <div class="card-head">
+      <h2>把想说的话变成语音</h2>
+      <span class="hint">使用上方全站音色</span>
+    </div>
+    <form id="studioTextForm" class="rows">
+      <div class="field">
+        <label for="studioText">要合成的内容</label>
+        <textarea id="studioText" maxlength="800" placeholder="例如：明天早上八点有高等数学，记得带伞。"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit" id="studioSubmit">生成语音</button>
+    </form>
+    <div class="divider" style="margin:18px 0"></div>
+    <div class="player-bar">
+      <audio id="studioAudio" controls preload="none"></audio>
+      <span class="pv">生成后会自动播放</span>
+    </div>
+  </div>
+
+  <div class="card studio-tips">
+    <div class="card-head"><h2>使用小贴士</h2></div>
+    <ul class="tip-list">
+      <li><strong>音色全站生效</strong><span>在这里选好后，仪表盘、大屏、资讯播报都会用同一个声音。</span></li>
+      <li><strong>约 30 秒播完</strong><span>播报会自动控制时长，内容完整、不会被截断。</span></li>
+      <li><strong>自动保底</strong><span>网络或云端音色不可用时，自动切到本地音色，不影响使用。</span></li>
+    </ul>
+    <div class="studio-tip-foot">
+      <a class="btn btn-sm" href="/settings">调整语速与城市 →</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script type="application/json" id="voiceCatalog">{{ catalog | tojson }}</script>
+{% endblock %}

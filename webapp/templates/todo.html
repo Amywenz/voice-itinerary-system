@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}今日待办{% endblock %}
+{% block eyebrow %}DAILY PLAN{% endblock %}
+{% block heading %}今日待办{% endblock %}
+{% block content %}
+
+<section class="card todo-hero">
+  <div class="todo-hero-copy">
+    <span class="todo-kicker">TODAY · {{ now.strftime('%m月%d日') }}</span>
+    <h2>今天，先把要紧的事做完</h2>
+    <p>{{ now.strftime('%H:%M') }} · 待办只保存在你自己的浏览器里，换个页面也会记得。</p>
+  </div>
+  <div class="progress-ring" id="todoRing" style="--p:0%">
+    <div class="ring-inner">
+      <strong id="todoPercent">0%</strong>
+      <span>完成</span>
+    </div>
+  </div>
+</section>
+
+<div class="todo-grid">
+  <div class="card" id="todoPage">
+    <div class="card-head">
+      <h2>今天的清单</h2>
+      <span class="hint">做完一件，打个勾</span>
+    </div>
+
+    <form id="todoForm" class="todo-form">
+      <input id="todoText" type="text" maxlength="80" autocomplete="off"
+             placeholder="要做什么？例如：复习高数第三章">
+      <button class="btn btn-primary" type="submit">添加</button>
+    </form>
+
+    <div class="todo-filters">
+      <button class="todo-filter active" type="button" data-filter="all">全部</button>
+      <button class="todo-filter" type="button" data-filter="active">未完成</button>
+      <button class="todo-filter" type="button" data-filter="done">已完成</button>
+    </div>
+
+    <div class="todo-list" id="todoList"></div>
+    <div class="todo-empty" id="todoEmpty" hidden>
+      <strong>今天还没有待办</strong>
+      <span>先加一件最想完成的事，从小的开始。</span>
+    </div>
+
+    <div class="todo-foot">
+      <span id="todoSummary">今天还没有待办，先加一件吧</span>
+      <button class="btn btn-sm" type="button" id="todoClear">清除已完成</button>
+    </div>
+  </div>
+
+  <aside class="card todo-side">
+    <div class="card-head"><h2>把待办用起来</h2></div>
+    <ul class="tip-list">
+      <li><strong>一次只做一件</strong><span>待办写得越具体，越容易开始。</span></li>
+      <li><strong>未完成会带到明天</strong><span>没做完的事不会消失，第二天自动出现在清单里。</span></li>
+      <li><strong>配合专注计时</strong><span>选一件事，去<a href="/focus">专注 25 分钟</a>，效率更高。</span></li>
+    </ul>
+    <div class="todo-side-foot">
+      <a class="btn btn-sm" href="/focus">开始专注 →</a>
+    </div>
+  </aside>
+</div>
+
+{% endblock %}
