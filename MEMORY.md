@@ -89,4 +89,12 @@
 - 大屏资讯曾挤在左边：`stage.css` 缺 `.span-12`，`news-card` 只占 1/12 栏；已补 `.span-12` 并把 `.stage-news` 改为 3 栏网格（`theme.css`）。
 - 用户要求“日常可用的系统”，界面文案不出现引擎名（edge/Piper/SAPI/OpenVoice）、采样率、链路、权重、Excel/pandas 等；`/api/*` 返回的 `engine` 字段只留在接口里，不再渲染到页面。
 
+## 9. 版本库与 GitHub 上传（2026-10-27）
+
+- 原仓库根在 `F:\Git\Gitworkspace`（不是项目目录），唯一提交 `7809270f` 把 `.venv/`（26 700 个文件）、`checkpoints/*.pth`、`voices/*.onnx` 一并纳入，push 被 GitHub `pre-receive hook declined` 拒绝（`torch/lib/dnnl.lib` 532MB、`torch_cpu.dll` 240MB、两个 checkpoint 153/125MB、5 个 onnx 各 60~73MB），远程此前一直为空。
+- 修法：项目根加 `.gitignore`（`.venv/`、`venv/`、`checkpoints/`、`voices/`、`outputs/`、`config.local.yaml`、`__pycache__/`、`*.py[cod]`、`.pytest_cache/`、`.screenshots/`、`.idea/`、`data/news_cache.json`），在 `Democode/voice-itinerary-system` 重新 `git init -b master` 后提交 95 个文件（4.45MB），`git push -u origin master` 成功，远程 `master` 与本地 `61bcfe8` 一致。
+- `config.local.yaml` 因 push 一直被拒，密钥从未到达 GitHub；它现在被 `.gitignore` 排除，今后不要 `git add -f`。
+- 新 clone 后必须自建 `.venv` 并跑 `scripts/download_models.py`（约 292MB）+ `scripts/download_voices.py`（约 315MB），否则 TTS 只能走 edge/SAPI 保底。
+- 旧 `.git` 已改名为 `F:\Git\Gitworkspace\.git.bak`（979MB）留作备份，确认无用后可删；`F:\Git\Gitworkspace\-` 是误建的空仓库，与本项目无关。
+
 
